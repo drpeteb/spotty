@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+
+import sys
+from optparse import OptionParser
 import numpy as np
 import matplotlib.pyplot as plt
 import numpy.random as sprand
@@ -95,13 +99,42 @@ def spotty(message, fontSize=100, borderSize=0.5, dotRadius=3, numDots=10000):
     return dotImage
 
 
+def main(argv):
+    """Parse arguments and call spotty"""
+    
+    parser = OptionParser()
+    parser.add_option("-m", "--message", dest="message", help="Message to make spotty")
+    parser.add_option("-f", "--file", dest="filename", default=None, help="Output file name")
+    parser.add_option("-s", "--fontsize", dest="fontSize", default=100, help="Font size for message")
+    parser.add_option("-b", "--bordersize", dest="borderSize", default=0.5, help="Border thickness in inches")
+    parser.add_option("-r", "--dotradius", dest="dotRadius", default=3, help="Radius of spots in pixels")
+    parser.add_option("-n", "--numdots", dest="numDots", default=10000, help="Number of dots")
+    
+    (options, args) = parser.parse_args()
+    
+    image = spotty(options.message,
+                   fontSize=options.fontSize,
+                   borderSize=options.borderSize,
+                   dotRadius=options.dotRadius,
+                   numDots=options.numDots)
+    
+    fig = plt.figure()
+    plt.imshow(image)
+    plt.axis('off')
+    if options.filename:
+        fig.savefig('{}.pdf'.format(options.filename))
 
-# Try it out
-plt.close("all")
-imdot = spotty('tEsTiNg!?', numDots=10000)
+if __name__ == "__main__":
+    main(sys.argv[1:])
 
-# See what it looks like
-fig = plt.figure()
-plt.imshow(imdot)
-plt.axis('off')
-fig.savefig('test.pdf')
+
+
+## Try it out
+#plt.close("all")
+#imdot = spotty('tEsTiNg!?', numDots=10000)
+#
+## See what it looks like
+#fig = plt.figure()
+#plt.imshow(imdot)
+#plt.axis('off')
+#fig.savefig('test.pdf')

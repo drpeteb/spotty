@@ -2,21 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import numpy.random as sprand
 
-
-
-
-def spotty(message, figwidth, fontsize=90, scale=95, descent=0.29, border=0.2, dotratio=0.02, numdots=1000):
+def spotty(message, fontSize=100, borderSize=0.5, dotRadius=3, numDots=10000):
     """Draw a message with dots"""
     
-    # Set figure height
-    figheight = (1+2*border)*fontsize*(1+descent)/scale
-
-    # Create the message figure
-    fig = plt.figure(figsize=(figwidth,figheight))
+    # Create a figure in which to render the text to see how big it is
+    fig = plt.figure(figsize=(1,1))
     ax = fig.add_axes((0,0,1,1))
 
     # Write the message
-    ax.text(0.01*figwidth, (border+descent)/(1+2*border+descent), "A message!", fontsize=fontsize)
+    text = ax.text(0, 0, message, fontsize=fontSize)
     
     # Remove the axes
     ax.set_frame_on(False)
@@ -24,113 +18,90 @@ def spotty(message, figwidth, fontsize=90, scale=95, descent=0.29, border=0.2, d
     ax.set_yticks([])
     plt.axis('off')
 
-    # Renderer
+    # Fire up a renderer
     fig.canvas.draw()
     
-    # Convert to a numpy array
-    w,h = fig.canvas.get_width_height()
-    immes = np.fromstring( fig.canvas.tostring_rgb(), dtype=np.uint8 )
-    immes.shape = (h,w,3)
+    # Get the bounding box coordinates
+    textExtent = text.get_window_extent().get_points()
+    
+    # Work out where to put the text
+    textHeight = textExtent[1,1]-textExtent[0,1]
+    textDescent = textExtent[0,1]
+    textWidth = textExtent[1,0]
+    assert(textExtent[0,0]==0)
+    
+    # Figure size
+    figHeight = textHeight/fig.dpi + 2*borderSize
+    figWidth = textWidth/fig.dpi + 2*borderSize
+    figDescent = textDescent/fig.dpi
+    
+    # Close the figure
+    plt.close(fig)
+    
+    # Create the message figure
+    fig = plt.figure(figsize=(figWidth,figHeight))
+    ax = fig.add_axes((0,0,1,1))
+
+    # Write the message
+    text = ax.text(borderSize/figWidth, (borderSize-figDescent)/figHeight, message, fontsize=fontSize)
+    
+    # Remove the axes
+    ax.set_frame_on(False)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    plt.axis('off')
+
+    # Fire up a renderer
+    fig.canvas.draw()
+    
+    # Render the figure to a numpy array
+    pixWidth,pixHeight = fig.canvas.get_width_height()
+    messageImage = np.fromstring( fig.canvas.tostring_rgb(), dtype=np.uint8 )
+    messageImage.shape = (pixHeight,pixWidth,3)
     plt.close(fig)
     
     # Convert to black and white
-    immes = np.mean(immes, axis=2)    
-    
-    #print( immes.shape )
-    #print( np.unique(immes) )
-    #for row in immes:
-    #    print(row)
+    messageImage = np.mean(messageImage, axis=2)    
     
     # Convert to a mask with 1 for text present
-    textmask = immes!=191
+    textMask = messageImage!=191
     
-    #print(np.sum(textmask)/textmask.size)
+    # Create image array
+    dotImage = np.ones((pixHeight,pixWidth,3))
+    iPix = np.arange(pixHeight)[:,np.newaxis]
+    jPix = np.arange(pixWidth)[np.newaxis,:]
     
-    # Dot size
-    rad = dotratio*figheight
-    
-    # Final figure
-    dotfig = plt.figure(figsize=(figwidth,figheight))
-    dotax = dotfig.add_axes((0,0,1,1))
-    dotax.set_xlim((0,figwidth))
-    dotax.set_ylim((0,figheight))
-    dotax.set_frame_on(False)
-    dotax.set_xticks([])
-    dotax.set_yticks([])
-    plt.axis('off')
-
     # Dot loop
-    for ii in range(numdots):      
+    for dd in range(numDots):
         
-        if (ii%100)==0:
-            print(ii)
+        if ((dd+1)%100)==0:
+            print("Drawn {} dots.".format(dd+1))
         
         # Generate a random dot colour and position
-        col = sprand.uniform(size=3)
-        pos = ( sprand.uniform(low=0.0, high=figwidth), sprand.uniform(low=0.0, high=figheight) )
-
-        # Create figure
-        fig = plt.figure(figsize=(figwidth,figheight))
-        ax = fig.add_axes((0,0,1,1))
-        ax.set_xlim((0,figwidth))
-        ax.set_ylim((0,figheight))
-        ax.set_frame_on(False)
-        ax.set_xticks([])
-        ax.set_yticks([])
-        plt.axis('off')
+        dotColour = sprand.uniform(low=0.0, high=1.0, size=3)
+        dotPosition = ( sprand.uniform(low=0.0, high=pixHeight), sprand.uniform(low=0.0, high=pixWidth) )
         
-        # Draw the circle
-        circle_artist = plt.Circle(pos,rad,color=col,fill=True)
-        ax.add_artist(circle_artist)
-
-        # Renderer
-        fig.canvas.draw()
+        # Work out which pixels would be coloured
+        tempImage = np.zeros((pixHeight,pixWidth))
+        distToDot = np.hypot(iPix-dotPosition[0], jPix-dotPosition[1])
+        tempImage[distToDot<dotRadius] = 1
         
-        # Convert to a numpy array
-        w,h = fig.canvas.get_width_height()
-        imcirc = np.fromstring( fig.canvas.tostring_rgb(), dtype=np.uint8 )
-        imcirc.shape = (h,w,3)
-
         # See if the dot intersects with the text
-        imcirc = np.mean(imcirc, axis=2)
-        #print(imcirc)        
-        if np.all( np.logical_or(imcirc==191, textmask==False) ):
+        if np.all(np.logical_and(tempImage, textMask)==False):
             
-            #print(ii)
-            
-            # Draw the circle on the main axes
-            dotax.add_artist(circle_artist)
-
-        # Close the test figure
-        plt.close(fig)
-
-    # Renderer
-    dotfig.canvas.draw()
-        
-    # Convert to a numpy array
-    w,h = dotfig.canvas.get_width_height()
-    imdot = np.fromstring( dotfig.canvas.tostring_rgb(), dtype=np.uint8 )
-    imdot.shape = (h,w,3)
+            # Add the dot to the image
+            dotImage[distToDot<dotRadius,:] = dotColour
     
-    plt.close(dotfig)
-    
-    return imdot
+    return dotImage
 
 
 
-
-
-
-
-imdot = spotty('TeStInG!?', 10, numdots=5000)
+# Try it out
+plt.close("all")
+imdot = spotty('tEsTiNg!?', numDots=10000)
 
 # See what it looks like
-#plt.figure(figsize=(figwidth,figheight))
 fig = plt.figure()
-plt.imshow(imdot)#, cmap='bone')
+plt.imshow(imdot)
 plt.axis('off')
 fig.savefig('test.pdf')
-#plt.axis("off");
-
-#print(imdot)
-

@@ -16,4 +16,4 @@ Options:
                         Radius of spots in pixels
   -n NUMDOTS, --numdots=NUMDOTS
                         Number of dots
-'''
+```

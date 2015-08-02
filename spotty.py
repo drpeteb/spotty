@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 from optparse import OptionParser
@@ -47,7 +47,8 @@ def spotty(message, fontSize=100, borderSize=0.5, dotRadius=3, numDots=10000):
     ax = fig.add_axes((0,0,1,1))
 
     # Write the message
-    text = ax.text(borderSize/figWidth, (borderSize-figDescent)/figHeight, message, fontsize=fontSize)
+    text = ax.text(borderSize/figWidth, (borderSize-figDescent)/figHeight,
+                   message, fontsize=fontSize)
     
     # Remove the axes
     ax.set_frame_on(False)
@@ -78,12 +79,13 @@ def spotty(message, fontSize=100, borderSize=0.5, dotRadius=3, numDots=10000):
     # Dot loop
     for dd in range(numDots):
         
-        if ((dd+1)%100)==0:
+        if ((dd+1)%1000)==0:
             print("Drawn {} dots.".format(dd+1))
         
         # Generate a random dot colour and position
         dotColour = sprand.uniform(low=0.0, high=1.0, size=3)
-        dotPosition = ( sprand.uniform(low=0.0, high=pixHeight), sprand.uniform(low=0.0, high=pixWidth) )
+        dotPosition = ( sprand.uniform(low=0.0, high=pixHeight),
+                        sprand.uniform(low=0.0, high=pixWidth) )
         
         # Work out which pixels would be coloured
         tempImage = np.zeros((pixHeight,pixWidth))
@@ -102,39 +104,39 @@ def spotty(message, fontSize=100, borderSize=0.5, dotRadius=3, numDots=10000):
 def main(argv):
     """Parse arguments and call spotty"""
     
-    parser = OptionParser()
-    parser.add_option("-m", "--message", dest="message", help="Message to make spotty")
-    parser.add_option("-f", "--file", dest="filename", default=None, help="Output file name")
-    parser.add_option("-s", "--fontsize", dest="fontSize", default=100, help="Font size for message")
-    parser.add_option("-b", "--bordersize", dest="borderSize", default=0.5, help="Border thickness in inches")
-    parser.add_option("-r", "--dotradius", dest="dotRadius", default=3, help="Radius of spots in pixels")
-    parser.add_option("-n", "--numdots", dest="numDots", default=10000, help="Number of dots")
+    usage = "usage: %prog message [options]"
+    parser = OptionParser(usage=usage)
+    parser.add_option("-f", "--file", dest="filename", default=None,
+                      help="Output file name")
+    parser.add_option("-s", "--fontsize", dest="fontSize", default=100,
+                      help="Font size for message")
+    parser.add_option("-b", "--bordersize", dest="borderSize", default=0.5,
+                      help="Border thickness in inches")
+    parser.add_option("-r", "--dotradius", dest="dotRadius", default=3,
+                      help="Radius of spots in pixels")
+    parser.add_option("-n", "--numdots", dest="numDots", default=10000,
+                      help="Number of dots")
     
     (options, args) = parser.parse_args()
     
-    image = spotty(options.message,
-                   fontSize=options.fontSize,
-                   borderSize=options.borderSize,
-                   dotRadius=options.dotRadius,
-                   numDots=options.numDots)
+    if len(args)==0:
+        parser.error("You must supply a message to make spotty.")
+    
+    message = args[0]
+    
+    image = spotty(message,
+                   fontSize=int(options.fontSize),
+                   borderSize=float(options.borderSize),
+                   dotRadius=float(options.dotRadius),
+                   numDots=int(options.numDots))
     
     fig = plt.figure()
     plt.imshow(image)
     plt.axis('off')
+    plt.show()
     if options.filename:
         fig.savefig('{}.pdf'.format(options.filename))
 
+
 if __name__ == "__main__":
     main(sys.argv[1:])
-
-
-
-## Try it out
-#plt.close("all")
-#imdot = spotty('tEsTiNg!?', numDots=10000)
-#
-## See what it looks like
-#fig = plt.figure()
-#plt.imshow(imdot)
-#plt.axis('off')
-#fig.savefig('test.pdf')

@@ -1,6 +1,7 @@
 # spotty
 A script to render a message as an absence of dots
 
+```
 Usage: spotty.py message [options]
 
 Options:
@@ -15,3 +16,4 @@ Options:
                         Radius of spots in pixels
   -n NUMDOTS, --numdots=NUMDOTS
                         Number of dots
+'''

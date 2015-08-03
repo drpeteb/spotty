@@ -135,7 +135,7 @@ def main(argv):
     plt.axis('off')
     plt.show()
     if options.filename:
-        fig.savefig('{}.pdf'.format(options.filename))
+        fig.savefig('{}'.format(options.filename))
 
 
 if __name__ == "__main__":

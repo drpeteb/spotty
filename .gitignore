@@ -1,0 +1,9 @@
+# bytecode caches from Python 2 and 3
+*.pyc
+__pycache__
+
+# detritus from setuptools
+build
+dist
+*.egg-info
+

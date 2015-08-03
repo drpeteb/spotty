@@ -101,8 +101,13 @@ def spotty(message, fontSize=100, borderSize=0.5, dotRadius=3, numDots=10000):
     return dotImage
 
 
-def main(argv):
-    """Parse arguments and call spotty"""
+def main(argv=None):
+    """Parse arguments and call spotty. If argv is None, sys.argv[1:] is
+    used.
+    
+    """
+    if argv is None:
+        argv = sys.argv[1:]
     
     usage = "usage: %prog message [options]"
     parser = OptionParser(usage=usage)

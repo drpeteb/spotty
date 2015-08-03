@@ -17,3 +17,14 @@ Options:
   -n NUMDOTS, --numdots=NUMDOTS
                         Number of dots
 ```
+
+## Installation
+
+Use ``pip`` to install directly from GitHub:
+
+```console
+$ pip install git+https://github.com/drpeteb/spotty#egg=spotty
+```
+
+The ``spotty`` command should then be available in your ``PATH`` as per usual.
+

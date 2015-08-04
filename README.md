@@ -1,6 +1,8 @@
 # spotty
 A script to render a message as an absence of dots
 
+![Example spotty output](example.png)
+
 ```
 Usage: spotty.py message [options]
 

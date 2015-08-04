@@ -35,9 +35,10 @@ def spotty(message, fontSize=100, borderSize=0.5, dotRadius=3, numDots=10000):
     assert(textExtent[0,0]==0)
     
     # Figure size
-    figHeight = textHeight/fig.dpi + 2*borderSize
-    figWidth = textWidth/fig.dpi + 2*borderSize
-    figDescent = textDescent/fig.dpi
+    dpi = fig.dpi
+    figHeight = textHeight/dpi + 2*borderSize
+    figWidth = textWidth/dpi + 2*borderSize
+    figDescent = textDescent/dpi
     
     # Close the figure
     plt.close(fig)
@@ -98,7 +99,7 @@ def spotty(message, fontSize=100, borderSize=0.5, dotRadius=3, numDots=10000):
             # Add the dot to the image
             dotImage[distToDot<dotRadius,:] = dotColour
     
-    return dotImage
+    return dotImage, dpi
 
 
 def main(argv=None):
@@ -129,18 +130,19 @@ def main(argv=None):
     
     message = args[0]
     
-    image = spotty(message,
-                   fontSize=int(options.fontSize),
-                   borderSize=float(options.borderSize),
-                   dotRadius=float(options.dotRadius),
-                   numDots=int(options.numDots))
+    image, dpi = spotty(message,
+                        fontSize=int(options.fontSize),
+                        borderSize=float(options.borderSize),
+                        dotRadius=float(options.dotRadius),
+                        numDots=int(options.numDots))
     
-    fig = plt.figure()
+    dims = image.shape
+    fig = plt.figure(figsize=(dims[1]/dpi, dims[0]/dpi), dpi=dpi)
     plt.imshow(image)
     plt.axis('off')
     plt.show()
     if options.filename:
-        fig.savefig('{}'.format(options.filename))
+        fig.savefig('{}'.format(options.filename), dpi=dpi)
 
 
 if __name__ == "__main__":

@@ -9,12 +9,17 @@ import numpy.random as sprand
 def spotty(message, fontSize=100, borderSize=0.5, dotRadius=3, numDots=10000):
     """Draw a message with dots"""
     
+    # Decode escape patterns
+    message = bytes(message, "utf-8").decode("unicode_escape")
+
     # Create a figure in which to render the text to see how big it is
     fig = plt.figure(figsize=(1,1))
     ax = fig.add_axes((0,0,1,1))
 
     # Write the message
-    text = ax.text(0, 0, message, fontsize=fontSize)
+    text = ax.text(0, 0, message, fontsize=fontSize,
+                                  horizontalalignment='center',
+                                  multialignment='center')
     
     # Remove the axes
     ax.set_frame_on(False)
@@ -31,14 +36,15 @@ def spotty(message, fontSize=100, borderSize=0.5, dotRadius=3, numDots=10000):
     # Work out where to put the text
     textHeight = textExtent[1,1]-textExtent[0,1]
     textDescent = textExtent[0,1]
-    textWidth = textExtent[1,0]
-    assert(textExtent[0,0]==0)
+    textWidth = textExtent[1,0]-textExtent[0,0]
+    textEdge = textExtent[0,0]
     
     # Figure size
     dpi = fig.dpi
     figHeight = textHeight/dpi + 2*borderSize
     figWidth = textWidth/dpi + 2*borderSize
     figDescent = textDescent/dpi
+    figEdge = textEdge/dpi
     
     # Close the figure
     plt.close(fig)
@@ -48,8 +54,11 @@ def spotty(message, fontSize=100, borderSize=0.5, dotRadius=3, numDots=10000):
     ax = fig.add_axes((0,0,1,1))
 
     # Write the message
-    text = ax.text(borderSize/figWidth, (borderSize-figDescent)/figHeight,
-                   message, fontsize=fontSize)
+    text = ax.text((borderSize-figEdge)/figWidth, (borderSize-figDescent)/figHeight,
+                   message,
+                   fontsize=fontSize,
+                   horizontalalignment='center',
+                   multialignment='center')
     
     # Remove the axes
     ax.set_frame_on(False)
